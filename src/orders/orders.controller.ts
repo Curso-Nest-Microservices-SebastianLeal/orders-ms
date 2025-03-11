@@ -1,45 +1,44 @@
 import { Controller, ParseUUIDPipe } from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';
+import { EventPattern, MessagePattern, Payload } from '@nestjs/microservices';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { OrderPaginationDto } from './dto/order-pagination.dto';
-import { ChangeOrderStatusDto } from './dto';
+import { ChangeOrderStatusDto, PaidOrderDto } from './dto';
 
-@Controller("orders")
+@Controller()
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) { }
 
-  @MessagePattern({ cmd: 'create_order' })
-  async createOrder(@Payload() createOrderDto: CreateOrderDto) {
-    try {
-      const product = await this.ordersService.createOrder(createOrderDto);
-      return product;
-    } catch (err) {
-      throw err;
+  @MessagePattern('createOrder')
+  async create(@Payload() createOrderDto: CreateOrderDto) {
+
+    const order = await this.ordersService.create(createOrderDto);
+    const paymentSession = await this.ordersService.createPaymentSession(order)
+
+    return {
+      order,
+      paymentSession,
     }
   }
 
   @MessagePattern('findAllOrders')
-  async findAllOrders(@Payload() orderPaginationDto: OrderPaginationDto) {
-    try {
-      return await this.ordersService.findAllOrders(orderPaginationDto);
-    } catch (err) {
-      throw err;
-    }
+  findAll(@Payload() orderPaginationDto: OrderPaginationDto) {
+    return this.ordersService.findAll(orderPaginationDto);
   }
 
   @MessagePattern('findOneOrder')
-  async findOneOrder(@Payload('id', ParseUUIDPipe) id: string) {
-    try {
-      return await this.ordersService.findOneOrder(id);
-    } catch (err) {
-      throw err;
-    }
+  findOne(@Payload('id', ParseUUIDPipe) id: string) {
+    return this.ordersService.findOne(id);
   }
 
   @MessagePattern('changeOrderStatus')
   changeOrderStatus(@Payload() changeOrderStatusDto: ChangeOrderStatusDto) {
-    return this.ordersService.changeOrderStatus(changeOrderStatusDto)
+    return this.ordersService.changeStatus(changeOrderStatusDto)
+  }
+
+  @EventPattern('payment.succeeded')
+  paidOrder(@Payload() paidOrderDto: PaidOrderDto) {
+    return this.ordersService.paidOrder(paidOrderDto);
   }
 
 }
