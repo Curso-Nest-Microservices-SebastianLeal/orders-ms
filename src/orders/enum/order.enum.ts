@@ -1,8 +1,8 @@
-import { OrderStatus } from "@prisma/client";
+import { OrderStatus } from '@prisma/client';
+
 
 export const OrderStatusList = [
- OrderStatus.PENDING,
- OrderStatus.DELIVERED,
- OrderStatus.CANCELED,
- OrderStatus.PAID
+  OrderStatus.PENDING,
+  OrderStatus.DELIVERED,
+  OrderStatus.CANCELLED,
 ]
