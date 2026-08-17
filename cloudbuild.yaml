@@ -18,5 +18,5 @@ options:
 
 availableSecrets:
   secretManager:
-    - versionName: projects/84487760395/secrets/orders_database_url
+    - versionName: projects/84487760395/secrets/orders_database_url/versions/latest
       env: 'DATABASE_URL'
